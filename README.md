@@ -1,11 +1,11 @@
-Jenson
+JenSON
 ======
 
-Jenson is a JSON serialization library bases on Qt's Property system and Qt's Json library.
+JenSON is a JSON serialization library based on Qt's Property system and Qt's Json library.
 
 Jenson's most interesting features are:
   - The very permissive BSD 2-clause license.
-  - Only one line of code to make a QObject class (de)serializable.
+  - Only one line of JenSON code to make a QObject class (de)serializable.
   - Custom serializers can be implemented to (de)serialize to/from specific data contracts.
 
 This library is originally developed for the finFoil project (https://github.com/hrobeers/finFoil).
