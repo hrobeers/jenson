@@ -25,7 +25,7 @@
 
 #include <QObject>
 #include <QUuid>
-#include "serialization/serialization.h"
+#include "src/serialization.h"
 
 class SerializationTests : public QObject
 {
@@ -35,8 +35,6 @@ private slots:
     void testSerialization();
     void testCustomSerialization();
     void testSerializationFailures();
-
-    void testPathSerialization();
 };
 
 
@@ -54,7 +52,7 @@ public:
     CustomSerializable() : x(5) {}
 };
 
-class CustomSerializableSerializer : public hrlib::serialization::CustomSerializer<CustomSerializable>
+class CustomSerializableSerializer : public jenson::serialization::CustomSerializer<CustomSerializable>
 {
 protected:
     virtual QJsonValue serializeImpl(const CustomSerializable *object) const override

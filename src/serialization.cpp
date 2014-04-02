@@ -26,7 +26,7 @@
 #include <QStringList>
 #include <QJsonArray>
 
-using namespace hrlib;
+using namespace jenson;
 
 
 //
@@ -123,7 +123,7 @@ static QJsonValue serialize(const QVariant var, bool *ok)
         {
             QString msg("Serialization::serialize not implemented for ");
             msg.append(var.typeName());
-            throw NotImplementedException(msg);
+            throw SerializationException(msg);
         }
 
         break;
@@ -230,7 +230,7 @@ std::unique_ptr<QObject> serialization::deserializeClass(const QJsonObject *json
     {
         QString msg = "serialization::deserialize failed for " + className +
                 ": the default ctor is not invokable. Add the Q_INVOKABLE macro.";
-        throw ImplementationException(msg);
+        throw SerializationException(msg);
     }
 
     // Loop over and write class properties

@@ -15,6 +15,7 @@ CONFIG   -= app_bundle
 TEMPLATE = app
 
 SOURCES += main.cpp \
+    serializationtests.cpp
 
 LIBS += -L$$PWD/../bin/ -ljenson
 
@@ -22,3 +23,4 @@ INCLUDEPATH +=  $$PWD/../src \
                 ../
 
 HEADERS += \
+    serializationtests.h

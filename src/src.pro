@@ -14,8 +14,10 @@ VERSION = 0.1.0
 DEFINES += JENSON_LIBRARY
 
 SOURCES += \
+    serialization.cpp
 
 HEADERS +=\
+    serialization.h
 
 unix:!symbian {
     maemo5 {

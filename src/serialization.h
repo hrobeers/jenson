@@ -20,18 +20,18 @@
 
 ****************************************************************************/
 
-#ifndef HRLIB_SERIALIZATION_H
-#define HRLIB_SERIALIZATION_H
+#ifndef JENSON_SERIALIZATION_H
+#define JENSON_SERIALIZATION_H
 
 #define SERIALIZABLE(CLASS, SERIAL_NAME) Q_DECLARE_METATYPE(CLASS *) \
     namespace serialization_register { /*Avoid name clashes with global variables*/\
-        static hrlib::serialization::registerForSerialization<CLASS> SERIAL_NAME(#SERIAL_NAME);\
+        static jenson::serialization::registerForSerialization<CLASS> SERIAL_NAME(#SERIAL_NAME);\
     }
 
 #define CUSTOMSERIALIZABLE(CLASS, CUSTOM_SERIALIZER_CLASS, SERIAL_NAME) Q_DECLARE_METATYPE(CLASS *) \
     namespace serialization_register { /*Avoid name clashes with global variables*/\
         static const CUSTOM_SERIALIZER_CLASS SERIAL_NAME##_SERIALIZER; \
-        static hrlib::serialization::registerForSerialization<CLASS> SERIAL_NAME(#SERIAL_NAME, &SERIAL_NAME##_SERIALIZER);\
+        static jenson::serialization::registerForSerialization<CLASS> SERIAL_NAME(#SERIAL_NAME, &SERIAL_NAME##_SERIALIZER);\
     }
 
 
@@ -39,17 +39,21 @@
 #include <QJsonObject>
 #include <QMetaProperty>
 #include "boost/bimap.hpp"
-#include "exceptions.h"
 
-namespace hrlib
+namespace jenson
 {
     typedef boost::bimap<QString, QString> nm_type;
 
-    class SerializationException : public Exception
+    class SerializationException : public std::exception
     {
+    private:
+        QString _message;
+
     public:
-        explicit SerializationException(QString &message, QObject *thrower = 0) throw()
-            : Exception(message, thrower) { }
+        explicit SerializationException(QString &message) throw()
+            : _message(message) {}
+
+        virtual const char* what() const throw() override { return _message.toStdString().c_str(); }
 
         virtual ~SerializationException() throw() {}
     };
@@ -177,4 +181,4 @@ namespace hrlib
     }
 }
 
-#endif // HRLIB_SERIALIZATION_H
+#endif // JENSON_SERIALIZATION_H

@@ -26,12 +26,6 @@
 #include <QJsonArray>
 #include <memory>
 
-#include "patheditor/path.h"
-#include "patheditor/line.h"
-#include "patheditor/cubicbezier.h"
-
-using namespace patheditor;
-
 void SerializationTests::testSerialization()
 {
     //
@@ -41,12 +35,12 @@ void SerializationTests::testSerialization()
     p.setOptionalStr("This is a Testobject");
     p.nestedObj()->setSomeString("This is a nested object");
 
-    QJsonObject obj = hrlib::serialization::serialize(&p);
+    QJsonObject obj = jenson::serialization::serialize(&p);
 
     //
     // Test deserialization
     //
-    std::unique_ptr<QObject> o = hrlib::serialization::deserializeToObject(&obj);
+    std::unique_ptr<QObject> o = jenson::serialization::deserializeToObject(&obj);
 
     QCOMPARE(o->metaObject()->className(), p.metaObject()->className());
 
@@ -76,11 +70,11 @@ void SerializationTests::testSerialization()
     //
     // Test optional property deserialization
     //
-    QJsonObject pObj = obj[hrlib::serialization::toSerialName(p.metaObject()->className())].toObject();
+    QJsonObject pObj = obj[jenson::serialization::toSerialName(p.metaObject()->className())].toObject();
     pObj.remove("optionalStr");
-    obj[hrlib::serialization::toSerialName(p.metaObject()->className())] = pObj;
+    obj[jenson::serialization::toSerialName(p.metaObject()->className())] = pObj;
 
-    std::unique_ptr<Testobject> optionalObj = hrlib::serialization::deserialize<Testobject>(&obj);
+    std::unique_ptr<Testobject> optionalObj = jenson::serialization::deserialize<Testobject>(&obj);
     QCOMPARE(optionalObj->optionalStr(), QStringLiteral("initialized"));
 }
 
@@ -88,17 +82,17 @@ void SerializationTests::testCustomSerialization()
 {
     // Test a plain custom serializable class
     CustomSerializable custom;
-    QJsonObject jObj = hrlib::serialization::serialize(&custom);
+    QJsonObject jObj = jenson::serialization::serialize(&custom);
 
-    std::unique_ptr<CustomSerializable> deserialized = hrlib::serialization::deserialize<CustomSerializable>(&jObj);
+    std::unique_ptr<CustomSerializable> deserialized = jenson::serialization::deserialize<CustomSerializable>(&jObj);
     QCOMPARE(deserialized->x, (custom.x / 2) + 5);
 
     // Test a nested custom serializable class
     CustomContainer cont;
     cont.setNested(deserialized.release());
-    jObj = hrlib::serialization::serialize(&cont);
+    jObj = jenson::serialization::serialize(&cont);
 
-    std::unique_ptr<CustomContainer> dCont = hrlib::serialization::deserialize<CustomContainer>(&jObj);
+    std::unique_ptr<CustomContainer> dCont = jenson::serialization::deserialize<CustomContainer>(&jObj);
     QCOMPARE(dCont->nested()->x, ((custom.x / 2) + 5) / 2 + 5);
 }
 
@@ -112,13 +106,13 @@ void SerializationTests::testSerializationFailures()
 
     QVERIFY(errorMsg.isEmpty());
 
-    std::unique_ptr<QObject> qObj = hrlib::serialization::deserializeToObject(&json, &errorMsg);
+    std::unique_ptr<QObject> qObj = jenson::serialization::deserializeToObject(&json, &errorMsg);
 
     QVERIFY(qObj == 0);
     QVERIFY(!errorMsg.isEmpty());
 
     // Test exception version
-    QTR_ASSERT_THROW(hrlib::serialization::deserializeToObject(&json), hrlib::SerializationException)
+    QTR_ASSERT_THROW(jenson::serialization::deserializeToObject(&json), jenson::SerializationException)
 
 
     //
@@ -128,14 +122,14 @@ void SerializationTests::testSerializationFailures()
     QString className("NotRegisteredClass");
     json.insert(className, QJsonValue());
 
-    qObj = hrlib::serialization::deserializeToObject(&json, &errorMsg2);
+    qObj = jenson::serialization::deserializeToObject(&json, &errorMsg2);
 
     QVERIFY(qObj == 0);
     QVERIFY(errorMsg != errorMsg2);
     QVERIFY(errorMsg2.contains(className));
 
     // Test exception version
-    QTR_ASSERT_THROW(hrlib::serialization::deserializeToObject(&json), hrlib::SerializationException)
+    QTR_ASSERT_THROW(jenson::serialization::deserializeToObject(&json), jenson::SerializationException)
 
 
     //
@@ -143,57 +137,26 @@ void SerializationTests::testSerializationFailures()
     //
     QString errorMsg3;
     Testobject p(0.2, -5.3);
-    QJsonObject json2 = hrlib::serialization::serialize(&p);
-    QJsonObject pObj = json2[hrlib::serialization::toSerialName(p.metaObject()->className())].toObject();
+    QJsonObject json2 = jenson::serialization::serialize(&p);
+    QJsonObject pObj = json2[jenson::serialization::toSerialName(p.metaObject()->className())].toObject();
     pObj.remove("x");
-    json2[hrlib::serialization::toSerialName(p.metaObject()->className())] = pObj;
+    json2[jenson::serialization::toSerialName(p.metaObject()->className())] = pObj;
 
-    qObj = hrlib::serialization::deserializeToObject(&json2, &errorMsg3);
+    qObj = jenson::serialization::deserializeToObject(&json2, &errorMsg3);
 
     QVERIFY(qObj == 0);
     QVERIFY(errorMsg2 != errorMsg3);
     QVERIFY(errorMsg3.contains("x"));
 
     // Test exception version
-    QTR_ASSERT_THROW(hrlib::serialization::deserializeToObject(&json2), hrlib::SerializationException)
+    QTR_ASSERT_THROW(jenson::serialization::deserializeToObject(&json2), jenson::SerializationException)
 
 
     //
     // Test exception on cast failure
     //
-    QJsonObject json3 = hrlib::serialization::serialize(&p);
-    QTR_ASSERT_THROW(std::unique_ptr<Nestedobject> invalidCast = hrlib::serialization::deserialize<Nestedobject>(&json3), hrlib::SerializationException)
-}
-
-void SerializationTests::testPathSerialization()
-{
-    std::unique_ptr<Path> path(new Path());
-
-    qreal m = 2;
-    std::shared_ptr<PathPoint> point1(new PathPoint(m*0, m*0));
-    std::shared_ptr<ControlPoint> point2(new ControlPoint(m*16.09549195, m*-31.53267));
-    std::shared_ptr<ControlPoint> point3(new ControlPoint(m*70.39944295, m*-113.577872));
-    std::shared_ptr<PathPoint> point4(new PathPoint(m*134.750359, m*-114.484482));
-    std::shared_ptr<PathPoint> point7(new PathPoint(m*170.304549, m*-97.240702));
-    std::shared_ptr<ControlPoint> point8(new ControlPoint(m*171.482419, m*-88.650189));
-    std::shared_ptr<ControlPoint> point9(new ControlPoint(m*134.604629, m*-78.11541));
-    std::shared_ptr<PathPoint> point10(new PathPoint(m*123.550789, m*-62.04205));
-
-    path->append(std::shared_ptr<PathItem>(new CubicBezier(point1, point2, point3, point4)));
-    path->append(std::shared_ptr<PathItem>(new Line(point4, point7)));
-    path->append(std::shared_ptr<PathItem>(new CubicBezier(point7, point8, point9, point10)));
-
-    QJsonObject obj = hrlib::serialization::serialize(path.get());
-
-    std::unique_ptr<Path> deserialized = hrlib::serialization::deserialize<Path>(&obj);
-
-    // Test PathItem count
-    QVERIFY(deserialized->pathItems().count() > 0);
-    QCOMPARE(deserialized->pathItems().count(), path->pathItems().count());
-    // Compare startPoints of last pathItems
-    QCOMPARE(*deserialized->pathItems().last()->constStartPoint(), *path->pathItems().last()->constStartPoint());
-    // Make sure that point to different objects
-    QVERIFY(deserialized->pathItems().last()->constStartPoint() != path->pathItems().last()->constStartPoint());
+    QJsonObject json3 = jenson::serialization::serialize(&p);
+    QTR_ASSERT_THROW(std::unique_ptr<Nestedobject> invalidCast = jenson::serialization::deserialize<Nestedobject>(&json3), jenson::SerializationException)
 }
 
 QTR_ADD_TEST(SerializationTests)
