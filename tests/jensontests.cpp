@@ -20,13 +20,13 @@
 
 ****************************************************************************/
 
-#include "serializationtests.h"
+#include "jensontests.h"
 #include "submodules/qtestrunner/qtestrunner.hpp"
 
 #include <QJsonArray>
 #include <memory>
 
-void SerializationTests::testSerialization()
+void JensonTests::testSerialization()
 {
     //
     // Test serialization
@@ -35,12 +35,12 @@ void SerializationTests::testSerialization()
     p.setOptionalStr("This is a Testobject");
     p.nestedObj()->setSomeString("This is a nested object");
 
-    QJsonObject obj = jenson::serialization::serialize(&p);
+    QJsonObject obj = jenson::JenSON::serialize(&p);
 
     //
     // Test deserialization
     //
-    std::unique_ptr<QObject> o = jenson::serialization::deserializeToObject(&obj);
+    std::unique_ptr<QObject> o = jenson::JenSON::deserializeToObject(&obj);
 
     QCOMPARE(o->metaObject()->className(), p.metaObject()->className());
 
@@ -70,33 +70,33 @@ void SerializationTests::testSerialization()
     //
     // Test optional property deserialization
     //
-    QJsonObject pObj = obj[jenson::serialization::toSerialName(p.metaObject()->className())].toObject();
+    QJsonObject pObj = obj[jenson::JenSON::toSerialName(p.metaObject()->className())].toObject();
     pObj.remove("optionalStr");
-    obj[jenson::serialization::toSerialName(p.metaObject()->className())] = pObj;
+    obj[jenson::JenSON::toSerialName(p.metaObject()->className())] = pObj;
 
-    std::unique_ptr<Testobject> optionalObj = jenson::serialization::deserialize<Testobject>(&obj);
+    std::unique_ptr<Testobject> optionalObj = jenson::JenSON::deserialize<Testobject>(&obj);
     QCOMPARE(optionalObj->optionalStr(), QStringLiteral("initialized"));
 }
 
-void SerializationTests::testCustomSerialization()
+void JensonTests::testCustomSerialization()
 {
     // Test a plain custom serializable class
     CustomSerializable custom;
-    QJsonObject jObj = jenson::serialization::serialize(&custom);
+    QJsonObject jObj = jenson::JenSON::serialize(&custom);
 
-    std::unique_ptr<CustomSerializable> deserialized = jenson::serialization::deserialize<CustomSerializable>(&jObj);
+    std::unique_ptr<CustomSerializable> deserialized = jenson::JenSON::deserialize<CustomSerializable>(&jObj);
     QCOMPARE(deserialized->x, (custom.x / 2) + 5);
 
     // Test a nested custom serializable class
     CustomContainer cont;
     cont.setNested(deserialized.release());
-    jObj = jenson::serialization::serialize(&cont);
+    jObj = jenson::JenSON::serialize(&cont);
 
-    std::unique_ptr<CustomContainer> dCont = jenson::serialization::deserialize<CustomContainer>(&jObj);
+    std::unique_ptr<CustomContainer> dCont = jenson::JenSON::deserialize<CustomContainer>(&jObj);
     QCOMPARE(dCont->nested()->x, ((custom.x / 2) + 5) / 2 + 5);
 }
 
-void SerializationTests::testSerializationFailures()
+void JensonTests::testSerializationFailures()
 {
     //
     // Test deserialization failure and error message for empty JSON object
@@ -106,13 +106,13 @@ void SerializationTests::testSerializationFailures()
 
     QVERIFY(errorMsg.isEmpty());
 
-    std::unique_ptr<QObject> qObj = jenson::serialization::deserializeToObject(&json, &errorMsg);
+    std::unique_ptr<QObject> qObj = jenson::JenSON::deserializeToObject(&json, &errorMsg);
 
     QVERIFY(qObj == 0);
     QVERIFY(!errorMsg.isEmpty());
 
     // Test exception version
-    QTR_ASSERT_THROW(jenson::serialization::deserializeToObject(&json), jenson::SerializationException)
+    QTR_ASSERT_THROW(jenson::JenSON::deserializeToObject(&json), jenson::SerializationException)
 
 
     //
@@ -122,14 +122,14 @@ void SerializationTests::testSerializationFailures()
     QString className("NotRegisteredClass");
     json.insert(className, QJsonValue());
 
-    qObj = jenson::serialization::deserializeToObject(&json, &errorMsg2);
+    qObj = jenson::JenSON::deserializeToObject(&json, &errorMsg2);
 
     QVERIFY(qObj == 0);
     QVERIFY(errorMsg != errorMsg2);
     QVERIFY(errorMsg2.contains(className));
 
     // Test exception version
-    QTR_ASSERT_THROW(jenson::serialization::deserializeToObject(&json), jenson::SerializationException)
+    QTR_ASSERT_THROW(jenson::JenSON::deserializeToObject(&json), jenson::SerializationException)
 
 
     //
@@ -137,26 +137,26 @@ void SerializationTests::testSerializationFailures()
     //
     QString errorMsg3;
     Testobject p(0.2, -5.3);
-    QJsonObject json2 = jenson::serialization::serialize(&p);
-    QJsonObject pObj = json2[jenson::serialization::toSerialName(p.metaObject()->className())].toObject();
+    QJsonObject json2 = jenson::JenSON::serialize(&p);
+    QJsonObject pObj = json2[jenson::JenSON::toSerialName(p.metaObject()->className())].toObject();
     pObj.remove("x");
-    json2[jenson::serialization::toSerialName(p.metaObject()->className())] = pObj;
+    json2[jenson::JenSON::toSerialName(p.metaObject()->className())] = pObj;
 
-    qObj = jenson::serialization::deserializeToObject(&json2, &errorMsg3);
+    qObj = jenson::JenSON::deserializeToObject(&json2, &errorMsg3);
 
     QVERIFY(qObj == 0);
     QVERIFY(errorMsg2 != errorMsg3);
     QVERIFY(errorMsg3.contains("x"));
 
     // Test exception version
-    QTR_ASSERT_THROW(jenson::serialization::deserializeToObject(&json2), jenson::SerializationException)
+    QTR_ASSERT_THROW(jenson::JenSON::deserializeToObject(&json2), jenson::SerializationException)
 
 
     //
     // Test exception on cast failure
     //
-    QJsonObject json3 = jenson::serialization::serialize(&p);
-    QTR_ASSERT_THROW(std::unique_ptr<Nestedobject> invalidCast = jenson::serialization::deserialize<Nestedobject>(&json3), jenson::SerializationException)
+    QJsonObject json3 = jenson::JenSON::serialize(&p);
+    QTR_ASSERT_THROW(std::unique_ptr<Nestedobject> invalidCast = jenson::JenSON::deserialize<Nestedobject>(&json3), jenson::SerializationException)
 }
 
-QTR_ADD_TEST(SerializationTests)
+QTR_ADD_TEST(JensonTests)

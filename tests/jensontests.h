@@ -20,14 +20,14 @@
 
 ****************************************************************************/
 
-#ifndef SERIALIZATIONTESTS_H
-#define SERIALIZATIONTESTS_H
+#ifndef JENSONTESTS_H
+#define JENSONTESTS_H
 
 #include <QObject>
 #include <QUuid>
-#include "src/serialization.h"
+#include "src/jenson.h"
 
-class SerializationTests : public QObject
+class JensonTests : public QObject
 {
     Q_OBJECT
 
@@ -52,7 +52,7 @@ public:
     CustomSerializable() : x(5) {}
 };
 
-class CustomSerializableSerializer : public jenson::serialization::CustomSerializer<CustomSerializable>
+class CustomSerializableSerializer : public jenson::JenSON::CustomSerializer<CustomSerializable>
 {
 protected:
     virtual QJsonValue serializeImpl(const CustomSerializable *object) const override
@@ -231,4 +231,4 @@ public:
 };
 SERIALIZABLE(Testobject, tObj)
 
-#endif // SERIALIZATIONTESTS_H
+#endif // JENSONTESTS_H

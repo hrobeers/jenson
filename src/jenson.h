@@ -20,18 +20,18 @@
 
 ****************************************************************************/
 
-#ifndef JENSON_SERIALIZATION_H
-#define JENSON_SERIALIZATION_H
+#ifndef JENSON_H
+#define JENSON_H
 
 #define SERIALIZABLE(CLASS, SERIAL_NAME) Q_DECLARE_METATYPE(CLASS *) \
     namespace serialization_register { /*Avoid name clashes with global variables*/\
-        static jenson::serialization::registerForSerialization<CLASS> SERIAL_NAME(#SERIAL_NAME);\
+        static jenson::JenSON::registerForSerialization<CLASS> SERIAL_NAME(#SERIAL_NAME);\
     }
 
 #define CUSTOMSERIALIZABLE(CLASS, CUSTOM_SERIALIZER_CLASS, SERIAL_NAME) Q_DECLARE_METATYPE(CLASS *) \
     namespace serialization_register { /*Avoid name clashes with global variables*/\
         static const CUSTOM_SERIALIZER_CLASS SERIAL_NAME##_SERIALIZER; \
-        static jenson::serialization::registerForSerialization<CLASS> SERIAL_NAME(#SERIAL_NAME, &SERIAL_NAME##_SERIALIZER);\
+        static jenson::JenSON::registerForSerialization<CLASS> SERIAL_NAME(#SERIAL_NAME, &SERIAL_NAME##_SERIALIZER);\
     }
 
 
@@ -58,7 +58,7 @@ namespace jenson
         virtual ~SerializationException() throw() {}
     };
 
-    class serialization
+    class JenSON
     {
     public:
         //
@@ -181,4 +181,4 @@ namespace jenson
     }
 }
 
-#endif // JENSON_SERIALIZATION_H
+#endif // JENSON_H

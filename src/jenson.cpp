@@ -20,7 +20,7 @@
 
 ****************************************************************************/
 
-#include "serialization.h"
+#include "jenson.h"
 
 #include <memory>
 #include <QStringList>
@@ -38,9 +38,9 @@ static bool findClass(const QJsonObject *jsonObj, QString *className, QString *e
     int keyCount = jsonObj->keys().count();
     if (keyCount == 1)
     {
-        QString type = serialization::toClassName(jsonObj->keys().first());
+        QString type = JenSON::toClassName(jsonObj->keys().first());
 
-        if (serialization::isRegistered(&type, errorMsg))
+        if (JenSON::isRegistered(&type, errorMsg))
         {
             *className = type;
             return true;
@@ -76,7 +76,7 @@ static QJsonValue serialize(const QVariant var, bool *ok)
         if (nestedObj)
         {
             *ok = true;
-            nestedJSON = serialization::serialize(nestedObj);
+            nestedJSON = JenSON::serialize(nestedObj);
             v = nestedJSON.value(nestedJSON.keys().first());
         }
         break;
@@ -99,9 +99,9 @@ static QJsonValue serialize(const QVariant var, bool *ok)
 
             QObject *qObj = qvariant_cast<QObject*>(lvar);
             if (qObj)
-                listItem.insert(serialization::toSerialName(qObj->metaObject()->className()), serialize(lvar, ok));
+                listItem.insert(JenSON::toSerialName(qObj->metaObject()->className()), serialize(lvar, ok));
             else
-                listItem.insert(serialization::toSerialName(lvar.typeName()), serialize(lvar, ok));
+                listItem.insert(JenSON::toSerialName(lvar.typeName()), serialize(lvar, ok));
 
             jsArray.append(listItem);
 
@@ -136,7 +136,7 @@ static QJsonValue serialize(const QVariant var, bool *ok)
 // serialization static class methods
 //
 
-QJsonObject serialization::serialize(const QObject *qObj)
+QJsonObject JenSON::serialize(const QObject *qObj)
 {
     QJsonObject retVal; // return value
     QJsonValue value;
@@ -177,7 +177,7 @@ QJsonObject serialization::serialize(const QObject *qObj)
     return retVal;
 }
 
-std::unique_ptr<QObject> serialization::deserializeToObject(const QJsonObject *jsonObj)
+std::unique_ptr<QObject> JenSON::deserializeToObject(const QJsonObject *jsonObj)
 {
     QString errorMsg;
     std::unique_ptr<QObject> retVal = deserializeToObject(jsonObj, &errorMsg);
@@ -188,7 +188,7 @@ std::unique_ptr<QObject> serialization::deserializeToObject(const QJsonObject *j
     return retVal;
 }
 
-std::unique_ptr<QObject> serialization::deserializeClass(const QJsonObject *jsonObj, QString className)
+std::unique_ptr<QObject> JenSON::deserializeClass(const QJsonObject *jsonObj, QString className)
 {
     QString errorMsg;
     std::unique_ptr<QObject> retVal = deserializeClass(jsonObj, className, &errorMsg);
@@ -199,7 +199,7 @@ std::unique_ptr<QObject> serialization::deserializeClass(const QJsonObject *json
     return retVal;
 }
 
-std::unique_ptr<QObject> serialization::deserializeToObject(const QJsonObject *jsonObj, QString *errorMsg)
+std::unique_ptr<QObject> JenSON::deserializeToObject(const QJsonObject *jsonObj, QString *errorMsg)
 {
     QString className;
 
@@ -217,7 +217,7 @@ std::unique_ptr<QObject> serialization::deserializeToObject(const QJsonObject *j
     return deserializeClass(&classDataObject, className, errorMsg);
 }
 
-std::unique_ptr<QObject> serialization::deserializeClass(const QJsonObject *jsonObj, QString className, QString *errorMsg)
+std::unique_ptr<QObject> JenSON::deserializeClass(const QJsonObject *jsonObj, QString className, QString *errorMsg)
 {
     className = className.replace('*', ""); // Properties can be pointer types
 
@@ -348,7 +348,7 @@ std::unique_ptr<QObject> serialization::deserializeClass(const QJsonObject *json
     return retVal;
 }
 
-bool serialization::isRegistered(QString *className, QString *errorMsg)
+bool JenSON::isRegistered(QString *className, QString *errorMsg)
 {
     if (!typeMap().contains(*className))
     {
@@ -360,7 +360,7 @@ bool serialization::isRegistered(QString *className, QString *errorMsg)
     return true;
 }
 
-QString serialization::toSerialName(QString className)
+QString JenSON::toSerialName(QString className)
 {
     className = className.replace('*', "");
     if (nameMap().left.find(className) == nameMap().left.end())
@@ -368,7 +368,7 @@ QString serialization::toSerialName(QString className)
     return nameMap().left.at(className);
 }
 
-QString serialization::toClassName(QString serialName)
+QString JenSON::toClassName(QString serialName)
 {
     serialName = serialName.replace('*', "");
     if (nameMap().right.find(serialName) == nameMap().right.end())
