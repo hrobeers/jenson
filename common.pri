@@ -6,4 +6,6 @@
 CONFIG += c++11
 
 # Place shared binaries in bin/ folder
-DESTDIR = $${_PRO_FILE_PWD_}/../bin
+count(DESTDIR, 0) {
+    DESTDIR = $${_PRO_FILE_PWD_}/../bin
+}
