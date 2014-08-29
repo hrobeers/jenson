@@ -5,6 +5,7 @@ set(BINARY_NAME "jenson")
 
 # Define the Build options
 option(DebugBuild "Build debug binaries." OFF)
+option(CCache "Build using ccache." OFF)
 
 # Set the CMAKE_BUILD_TYPE (Only DEBUG and RELEASE are supported)
 if(DebugBuild)
@@ -13,6 +14,11 @@ if(DebugBuild)
 else()
     set(CMAKE_BUILD_TYPE RELEASE)
     message(STATUS "CMAKE_BUILD_TYPE = RELEASE")
+endif()
+
+# Optionally set the compiler
+if(CCache)
+    SET_PROPERTY(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
 endif()
 
 # Set the compilation flags
