@@ -1,5 +1,3 @@
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
-
 # Sources
 set(SRC
     jenson.cpp
