@@ -6,6 +6,7 @@ set(SRC
 # Headers
 set(HDR
     jenson.h
+    qunique_ptr.hpp
 )
 
 

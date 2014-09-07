@@ -32,10 +32,27 @@ class JensonTests : public QObject
     Q_OBJECT
 
 private slots:
+    void initTestCase();
     void testSerialization();
     void testCustomSerialization();
     void testSerializationFailures();
 };
+
+
+//
+// Memory leak testing (testing qunique_ptr's deleter)
+//
+
+struct cntr
+{
+    QList<QObject*> objList;
+    bool enabled = false;
+    void inc(QObject* obj) { if (enabled) objList.append(obj); }
+    void dec(QObject* obj) { objList.removeAll(obj); }
+    ~cntr();
+};
+
+static cntr OBJ_CNT;
 
 
 //
@@ -49,7 +66,9 @@ class CustomSerializable : public QObject
 public:
     qreal x;
 
-    CustomSerializable() : x(5) {}
+    CustomSerializable() : x(5) { OBJ_CNT.inc(this); }
+
+    virtual ~CustomSerializable() { OBJ_CNT.dec(this); }
 };
 
 class CustomSerializableSerializer : public jenson::JenSON::CustomSerializer<CustomSerializable>
@@ -62,9 +81,9 @@ protected:
         retVal.insert("custom", val);
         return retVal;
     }
-    virtual std::unique_ptr<CustomSerializable> deserializeImpl(const QJsonValue *jsonValue, QString* /*unused*/) const override
+    virtual qunique_ptr<CustomSerializable> deserializeImpl(const QJsonValue *jsonValue, QString* /*unused*/) const override
     {
-        std::unique_ptr<CustomSerializable> retVal(new CustomSerializable());
+        qunique_ptr<CustomSerializable> retVal(new CustomSerializable());
         qreal x = jsonValue->toObject().value("custom").toDouble() + 5;
         retVal->x = x;
         return retVal;
@@ -79,12 +98,14 @@ class CustomContainer : public QObject
     Q_PROPERTY(CustomSerializable* nested READ nested WRITE setNested)
 
 private:
-    std::unique_ptr<CustomSerializable> _nested;
+    qunique_ptr<CustomSerializable> _nested;
 
 public:
-    Q_INVOKABLE CustomContainer() { _nested.reset(new CustomSerializable()); }
+    Q_INVOKABLE CustomContainer() { _nested.reset(new CustomSerializable()); OBJ_CNT.inc(this); }
     CustomSerializable* nested() { return _nested.get(); }
     void setNested(CustomSerializable* nested) { _nested.reset(nested); }
+
+    virtual ~CustomContainer() { OBJ_CNT.dec(this); }
 };
 SERIALIZABLE(CustomContainer, cContainer)
 
@@ -100,9 +121,9 @@ private:
     int _random;
 
 public:
-    Q_INVOKABLE Nestedobject() { _random = (int)this; }
+    Q_INVOKABLE Nestedobject() { _random = (int)this; OBJ_CNT.inc(this); }
 
-    virtual ~Nestedobject() {}
+    virtual ~Nestedobject() { OBJ_CNT.dec(this); }
 
     QString someString() const { return _someString; }
     int random() const { return _random; }
@@ -121,9 +142,9 @@ private:
     QUuid _someUuid;
 
 public:
-    Q_INVOKABLE SingleProperty() { _someUuid = QUuid::createUuid(); }
+    Q_INVOKABLE SingleProperty() { _someUuid = QUuid::createUuid(); OBJ_CNT.inc(this); }
 
-    virtual ~SingleProperty() {}
+    virtual ~SingleProperty() { OBJ_CNT.dec(this); }
 
     QUuid someUuid() const { return _someUuid; }
 
@@ -136,7 +157,9 @@ class DerivedSingleProperty : public SingleProperty
     Q_OBJECT
 
 public:
-    Q_INVOKABLE DerivedSingleProperty() : SingleProperty() {}
+    Q_INVOKABLE DerivedSingleProperty() : SingleProperty() { OBJ_CNT.inc(this); }
+
+    virtual ~DerivedSingleProperty() { OBJ_CNT.dec(this); }
 };
 SERIALIZABLE(DerivedSingleProperty, dProp)
 
@@ -177,8 +200,10 @@ private:
     }
 
 public:
-    Q_INVOKABLE Testobject() : _x(0), _y(0), _optionalStr("") { init(); }
-    Testobject(qreal x, qreal y) : _x(x), _y(y), _optionalStr("") { init(); }
+    Q_INVOKABLE Testobject() : _x(0), _y(0), _optionalStr("") { init(); OBJ_CNT.inc(this); }
+    Testobject(qreal x, qreal y) : _x(x), _y(y), _optionalStr("") { init(); OBJ_CNT.inc(this); }
+
+    virtual ~Testobject() { OBJ_CNT.dec(this); }
 
     QList<std::shared_ptr<SingleProperty>> *internalList() { return &_list; }
 

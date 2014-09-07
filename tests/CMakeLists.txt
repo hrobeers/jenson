@@ -11,6 +11,7 @@ set(SRC
 # Headers
 set(HDR
     jensontests.h
+    ../submodules/qtestrunner/qtestrunner.hpp
 )
 
 

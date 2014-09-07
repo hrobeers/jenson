@@ -39,6 +39,7 @@
 #include <QJsonObject>
 #include <QMetaProperty>
 #include "boost/bimap.hpp"
+#include "qunique_ptr.hpp"
 
 namespace jenson
 {
@@ -69,7 +70,7 @@ namespace jenson
         {
         public:
             virtual QJsonValue serialize(const QObject *object) const = 0;
-            virtual std::unique_ptr<QObject> deserialize(const QJsonValue *jsonValue, QString *errorMsg = 0) const = 0;
+            virtual qunique_ptr<QObject> deserialize(const QJsonValue *jsonValue, QString *errorMsg = 0) const = 0;
 
             virtual ~ICustomSerializer() {}
         };
@@ -79,12 +80,12 @@ namespace jenson
         {
         protected:
             virtual QJsonValue serializeImpl(const T *object) const = 0;
-            virtual std::unique_ptr<T> deserializeImpl(const QJsonValue *jsonValue, QString *errorMsg) const = 0;
+            virtual qunique_ptr<T> deserializeImpl(const QJsonValue *jsonValue, QString *errorMsg) const = 0;
 
         public:
             virtual QJsonValue serialize(const QObject *object) const override final
                 { return serializeImpl(qobject_cast<const T*>(object)); }
-            virtual std::unique_ptr<QObject> deserialize(const QJsonValue *jsonValue, QString *errorMsg = 0) const override final
+            virtual qunique_ptr<QObject> deserialize(const QJsonValue *jsonValue, QString *errorMsg = 0) const override final
                 { return deserializeImpl(jsonValue, errorMsg); }
 
             virtual ~CustomSerializer() {}
@@ -110,16 +111,16 @@ namespace jenson
     public:
         // Exception throwing methods
         static QJsonObject serialize(const QObject *qObj);
-        static std::unique_ptr<QObject> deserializeToObject(const QJsonObject *jsonObj);
-        static std::unique_ptr<QObject> deserializeClass(const QJsonObject *jsonObj, QString className);
+        static qunique_ptr<QObject> deserializeToObject(const QJsonObject *jsonObj);
+        static qunique_ptr<QObject> deserializeClass(const QJsonObject *jsonObj, QString className);
 
         // ErrorMsg methods
-        static std::unique_ptr<QObject> deserializeToObject(const QJsonObject *jsonObj, QString *errorMsg);
-        static std::unique_ptr<QObject> deserializeClass(const QJsonObject *jsonObj, QString className, QString *errorMsg);
+        static qunique_ptr<QObject> deserializeToObject(const QJsonObject *jsonObj, QString *errorMsg);
+        static qunique_ptr<QObject> deserializeClass(const QJsonObject *jsonObj, QString className, QString *errorMsg);
 
         // Casting methods
         template <typename T>
-        static std::unique_ptr<T> deserialize(const QJsonObject *jsonObj, QString *errorMsg)
+        static qunique_ptr<T> deserialize(const QJsonObject *jsonObj, QString *errorMsg)
         {
             QObject* deserialized = deserializeToObject(jsonObj, errorMsg).release();
             T* casted = qobject_cast<T*>(deserialized);
@@ -133,13 +134,13 @@ namespace jenson
                     errorMsg->append(instance.metaObject()->className());
                 }
             }
-            return std::unique_ptr<T>(casted);
+            return qunique_ptr<T>(casted);
         }
         template <typename T>
-        static std::unique_ptr<T> deserialize(const QJsonObject *jsonObj)
+        static qunique_ptr<T> deserialize(const QJsonObject *jsonObj)
         {
             QString errorMsg;
-            std::unique_ptr<T> retVal = deserialize<T>(jsonObj, &errorMsg);
+            qunique_ptr<T> retVal = deserialize<T>(jsonObj, &errorMsg);
             if (!retVal) throw SerializationException(errorMsg);
             return retVal;
         }
