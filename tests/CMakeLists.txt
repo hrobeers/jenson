@@ -28,4 +28,4 @@ add_executable(${TESTS_BINARY_NAME} WIN32 ${SRC} ${HDR} ${MOC_SRC} ${FORMS_HEADE
 #
 
 target_link_libraries(${TESTS_BINARY_NAME} Qt5::Core Qt5::Test)
-target_link_libraries(${TESTS_BINARY_NAME} jenson)
+target_link_libraries(${TESTS_BINARY_NAME} ${JENSON_BINARY_NAME})
