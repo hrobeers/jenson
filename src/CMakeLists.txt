@@ -1,3 +1,5 @@
+project(jenson)
+
 # Sources
 set(SRC
     jenson.cpp
@@ -6,7 +8,7 @@ set(SRC
 # Headers
 set(HDR
     jenson.h
-    qunique_ptr.hpp
+    qmemory.hpp
 )
 
 
@@ -14,12 +16,8 @@ set(HDR
 # The executable
 #
 
-if(NOT JENSON_BINARY_NAME)
-    set(JENSON_BINARY_NAME "jenson")
-endif()
-
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
-add_library(${JENSON_BINARY_NAME} ${SRC} ${HDR} ${MOC_SRC})
+add_library(jenson ${SRC} ${HDR} ${MOC_SRC})
 
 
 #
@@ -27,4 +25,4 @@ add_library(${JENSON_BINARY_NAME} ${SRC} ${HDR} ${MOC_SRC})
 #
 
 #Qt modules
-target_link_libraries(${JENSON_BINARY_NAME} Qt5::Core)
+target_link_libraries(jenson Qt5::Core)

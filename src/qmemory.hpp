@@ -1,6 +1,6 @@
 /****************************************************************************
 
- Copyright (c) 2013, Hans Robeers
+ Copyright (c) 2014, Hans Robeers
  All rights reserved.
 
  BSD 2-Clause License
@@ -20,17 +20,38 @@
 
 ****************************************************************************/
 
-#ifndef QUNIQUE_PTR_HPP
-#define QUNIQUE_PTR_HPP
+#ifndef QMEMORY_HPP
+#define QMEMORY_HPP
 
 #include <memory>
 #include <QObject>
 
-struct QObjectDeleter {
-  void operator()(QObject* ptr) { ptr->deleteLater(); }
-};
+struct QObjectDeleter { void operator()(QObject* ptr) { ptr->deleteLater(); } };
 
 template <typename T>
 using qunique_ptr = std::unique_ptr<T, QObjectDeleter>;
 
-#endif // QUNIQUE_PTR_HPP
+template <typename _Tp1>
+class qshared_ptr : public std::shared_ptr<_Tp1>
+{
+public:
+    qshared_ptr() noexcept : std::shared_ptr<_Tp1>() {}
+    qshared_ptr(_Tp1 *p) noexcept : std::shared_ptr<_Tp1>(p, QObjectDeleter()) {}
+
+    void reset(_Tp1* p) noexcept
+    { std::shared_ptr<_Tp1>(p, QObjectDeleter()).swap(*this); }
+};
+
+template <typename T>
+qshared_ptr<T> make_qshared()
+{
+    return qshared_ptr<T>(new T());
+}
+
+template <typename T>
+qshared_ptr<T> make_qshared(T* obj)
+{
+    return qshared_ptr<T>(obj);
+}
+
+#endif // QMEMORY_HPP

@@ -39,7 +39,7 @@
 #include <QJsonObject>
 #include <QMetaProperty>
 #include "boost/bimap.hpp"
-#include "qunique_ptr.hpp"
+#include "qmemory.hpp"
 
 namespace jenson
 {
@@ -171,15 +171,27 @@ namespace jenson
         };
     };
 
-    template <typename T>
-    static QList<const T*> toConstList(QList<std::shared_ptr<T>> list)
+
+    //
+    // Convenience functions
+    //
+
+    template <typename T, typename pT>
+    static QList<const T*> toConstList(QList<pT> list)
     {
         QList<const T *> retVal;
-        for (std::shared_ptr<T> &item: list) {
+        for (pT &item: list) {
             retVal.append(item.get());
         }
         return retVal;
     }
+
+    template <typename T>
+    static QList<const T*> toConstList(QList<std::shared_ptr<T>> list)
+    { return toConstList<T, std::shared_ptr<T>>(list); }
+    template <typename T>
+    static QList<const T*> toConstList(QList<qshared_ptr<T>> list)
+    { return toConstList<T, qshared_ptr<T>>(list); }
 }
 
 #endif // JENSON_H

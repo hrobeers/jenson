@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 2.8.11)
 
+
+#
+# Project settings
+#
+
 project(jenson)
-set(JENSON_BINARY_NAME "jenson")
 set(TESTS_BINARY_NAME "jenson-tests")
 
 
