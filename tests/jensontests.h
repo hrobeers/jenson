@@ -40,7 +40,7 @@ private slots:
 
 
 //
-// Memory leak testing (testing qunique_ptr's deleter)
+// Memory leak testing (testing sptr's deleter)
 //
 
 struct cntr
@@ -81,9 +81,9 @@ protected:
         retVal.insert("custom", val);
         return retVal;
     }
-    virtual qunique_ptr<CustomSerializable> deserializeImpl(const QJsonValue *jsonValue, QString* /*unused*/) const override
+    virtual sptr<CustomSerializable> deserializeImpl(const QJsonValue *jsonValue, QString* /*unused*/) const override
     {
-        qunique_ptr<CustomSerializable> retVal(new CustomSerializable());
+        sptr<CustomSerializable> retVal(new CustomSerializable());
         qreal x = jsonValue->toObject().value("custom").toDouble() + 5;
         retVal->x = x;
         return retVal;
@@ -98,7 +98,7 @@ class CustomContainer : public QObject
     Q_PROPERTY(CustomSerializable* nested READ nested WRITE setNested)
 
 private:
-    qunique_ptr<CustomSerializable> _nested;
+    sptr<CustomSerializable> _nested;
 
 public:
     Q_INVOKABLE CustomContainer() { _nested.reset(new CustomSerializable()); OBJ_CNT.inc(this); }

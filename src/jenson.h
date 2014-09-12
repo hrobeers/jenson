@@ -41,6 +41,14 @@
 #include "boost/bimap.hpp"
 #include "qmemory.hpp"
 
+#ifdef QPTR
+    template <typename T>
+    using sptr = qunique_ptr<T>;
+#else
+    template <typename T>
+    using sptr = std::unique_ptr<T>;
+#endif
+
 namespace jenson
 {
     typedef boost::bimap<QString, QString> nm_type;
@@ -70,7 +78,7 @@ namespace jenson
         {
         public:
             virtual QJsonValue serialize(const QObject *object) const = 0;
-            virtual qunique_ptr<QObject> deserialize(const QJsonValue *jsonValue, QString *errorMsg = 0) const = 0;
+            virtual sptr<QObject> deserialize(const QJsonValue *jsonValue, QString *errorMsg = 0) const = 0;
 
             virtual ~ICustomSerializer() {}
         };
@@ -80,12 +88,12 @@ namespace jenson
         {
         protected:
             virtual QJsonValue serializeImpl(const T *object) const = 0;
-            virtual qunique_ptr<T> deserializeImpl(const QJsonValue *jsonValue, QString *errorMsg) const = 0;
+            virtual sptr<T> deserializeImpl(const QJsonValue *jsonValue, QString *errorMsg) const = 0;
 
         public:
             virtual QJsonValue serialize(const QObject *object) const override final
                 { return serializeImpl(qobject_cast<const T*>(object)); }
-            virtual qunique_ptr<QObject> deserialize(const QJsonValue *jsonValue, QString *errorMsg = 0) const override final
+            virtual sptr<QObject> deserialize(const QJsonValue *jsonValue, QString *errorMsg = 0) const override final
                 { return deserializeImpl(jsonValue, errorMsg); }
 
             virtual ~CustomSerializer() {}
@@ -111,16 +119,16 @@ namespace jenson
     public:
         // Exception throwing methods
         static QJsonObject serialize(const QObject *qObj);
-        static qunique_ptr<QObject> deserializeToObject(const QJsonObject *jsonObj);
-        static qunique_ptr<QObject> deserializeClass(const QJsonObject *jsonObj, QString className);
+        static sptr<QObject> deserializeToObject(const QJsonObject *jsonObj);
+        static sptr<QObject> deserializeClass(const QJsonObject *jsonObj, QString className);
 
         // ErrorMsg methods
-        static qunique_ptr<QObject> deserializeToObject(const QJsonObject *jsonObj, QString *errorMsg);
-        static qunique_ptr<QObject> deserializeClass(const QJsonObject *jsonObj, QString className, QString *errorMsg);
+        static sptr<QObject> deserializeToObject(const QJsonObject *jsonObj, QString *errorMsg);
+        static sptr<QObject> deserializeClass(const QJsonObject *jsonObj, QString className, QString *errorMsg);
 
         // Casting methods
         template <typename T>
-        static qunique_ptr<T> deserialize(const QJsonObject *jsonObj, QString *errorMsg)
+        static sptr<T> deserialize(const QJsonObject *jsonObj, QString *errorMsg)
         {
             QObject* deserialized = deserializeToObject(jsonObj, errorMsg).release();
             T* casted = qobject_cast<T*>(deserialized);
@@ -134,13 +142,13 @@ namespace jenson
                     errorMsg->append(instance.metaObject()->className());
                 }
             }
-            return qunique_ptr<T>(casted);
+            return sptr<T>(casted);
         }
         template <typename T>
-        static qunique_ptr<T> deserialize(const QJsonObject *jsonObj)
+        static sptr<T> deserialize(const QJsonObject *jsonObj)
         {
             QString errorMsg;
-            qunique_ptr<T> retVal = deserialize<T>(jsonObj, &errorMsg);
+            sptr<T> retVal = deserialize<T>(jsonObj, &errorMsg);
             if (!retVal) throw SerializationException(errorMsg);
             return retVal;
         }

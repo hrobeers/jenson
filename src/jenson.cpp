@@ -177,10 +177,10 @@ QJsonObject JenSON::serialize(const QObject *qObj)
     return retVal;
 }
 
-qunique_ptr<QObject> JenSON::deserializeToObject(const QJsonObject *jsonObj)
+sptr<QObject> JenSON::deserializeToObject(const QJsonObject *jsonObj)
 {
     QString errorMsg;
-    qunique_ptr<QObject> retVal = deserializeToObject(jsonObj, &errorMsg);
+    sptr<QObject> retVal = deserializeToObject(jsonObj, &errorMsg);
 
     if (!retVal)
         throw SerializationException(errorMsg);
@@ -188,10 +188,10 @@ qunique_ptr<QObject> JenSON::deserializeToObject(const QJsonObject *jsonObj)
     return retVal;
 }
 
-qunique_ptr<QObject> JenSON::deserializeClass(const QJsonObject *jsonObj, QString className)
+sptr<QObject> JenSON::deserializeClass(const QJsonObject *jsonObj, QString className)
 {
     QString errorMsg;
-    qunique_ptr<QObject> retVal = deserializeClass(jsonObj, className, &errorMsg);
+    sptr<QObject> retVal = deserializeClass(jsonObj, className, &errorMsg);
 
     if (!retVal)
         throw SerializationException(errorMsg);
@@ -199,7 +199,7 @@ qunique_ptr<QObject> JenSON::deserializeClass(const QJsonObject *jsonObj, QStrin
     return retVal;
 }
 
-qunique_ptr<QObject> JenSON::deserializeToObject(const QJsonObject *jsonObj, QString *errorMsg)
+sptr<QObject> JenSON::deserializeToObject(const QJsonObject *jsonObj, QString *errorMsg)
 {
     QString className;
 
@@ -217,7 +217,7 @@ qunique_ptr<QObject> JenSON::deserializeToObject(const QJsonObject *jsonObj, QSt
     return deserializeClass(&classDataObject, className, errorMsg);
 }
 
-qunique_ptr<QObject> JenSON::deserializeClass(const QJsonObject *jsonObj, QString className, QString *errorMsg)
+sptr<QObject> JenSON::deserializeClass(const QJsonObject *jsonObj, QString className, QString *errorMsg)
 {
     className = className.replace('*', ""); // Properties can be pointer types
 
@@ -225,7 +225,7 @@ qunique_ptr<QObject> JenSON::deserializeClass(const QJsonObject *jsonObj, QStrin
         return nullptr;
 
     const QObject *obj = typeMap()[className];
-    qunique_ptr<QObject> retVal(obj->metaObject()->newInstance());
+    sptr<QObject> retVal(obj->metaObject()->newInstance());
     if (!retVal)
     {
         QString msg = "serialization::deserialize failed for " + className +

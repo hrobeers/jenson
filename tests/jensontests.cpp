@@ -45,7 +45,7 @@ void JensonTests::testSerialization()
     //
     // Test deserialization
     //
-    qunique_ptr<QObject> o = jenson::JenSON::deserializeToObject(&obj);
+    sptr<QObject> o = jenson::JenSON::deserializeToObject(&obj);
 
     QCOMPARE(o->metaObject()->className(), p.metaObject()->className());
 
@@ -79,7 +79,7 @@ void JensonTests::testSerialization()
     pObj.remove("optionalStr");
     obj[jenson::JenSON::toSerialName(p.metaObject()->className())] = pObj;
 
-    qunique_ptr<Testobject> optionalObj = jenson::JenSON::deserialize<Testobject>(&obj);
+    sptr<Testobject> optionalObj = jenson::JenSON::deserialize<Testobject>(&obj);
     QCOMPARE(optionalObj->optionalStr(), QStringLiteral("initialized"));
 }
 
@@ -89,7 +89,7 @@ void JensonTests::testCustomSerialization()
     CustomSerializable custom;
     QJsonObject jObj = jenson::JenSON::serialize(&custom);
 
-    qunique_ptr<CustomSerializable> deserialized = jenson::JenSON::deserialize<CustomSerializable>(&jObj);
+    sptr<CustomSerializable> deserialized = jenson::JenSON::deserialize<CustomSerializable>(&jObj);
     QCOMPARE(deserialized->x, (custom.x / 2) + 5);
 
     // Test a nested custom serializable class
@@ -97,7 +97,7 @@ void JensonTests::testCustomSerialization()
     cont.setNested(deserialized.release());
     jObj = jenson::JenSON::serialize(&cont);
 
-    qunique_ptr<CustomContainer> dCont = jenson::JenSON::deserialize<CustomContainer>(&jObj);
+    sptr<CustomContainer> dCont = jenson::JenSON::deserialize<CustomContainer>(&jObj);
     QCOMPARE(dCont->nested()->x, ((custom.x / 2) + 5) / 2 + 5);
 }
 
@@ -111,7 +111,7 @@ void JensonTests::testSerializationFailures()
 
     QVERIFY(errorMsg.isEmpty());
 
-    qunique_ptr<QObject> qObj = jenson::JenSON::deserializeToObject(&json, &errorMsg);
+    sptr<QObject> qObj = jenson::JenSON::deserializeToObject(&json, &errorMsg);
 
     QVERIFY(qObj == 0);
     QVERIFY(!errorMsg.isEmpty());
@@ -161,7 +161,7 @@ void JensonTests::testSerializationFailures()
     // Test exception on cast failure
     //
     QJsonObject json3 = jenson::JenSON::serialize(&p);
-    QTR_ASSERT_THROW(qunique_ptr<Nestedobject> invalidCast = jenson::JenSON::deserialize<Nestedobject>(&json3), jenson::SerializationException)
+    QTR_ASSERT_THROW(sptr<Nestedobject> invalidCast = jenson::JenSON::deserialize<Nestedobject>(&json3), jenson::SerializationException)
 }
 
 cntr::~cntr()

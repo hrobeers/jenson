@@ -16,6 +16,7 @@ set(TESTS_BINARY_NAME "jenson-tests")
 # Define the Build flags
 option(DebugBuild "Build debug binaries." OFF)
 option(CCache "Build using ccache." OFF)
+option(QPTR "Serialize to qunique_ptr<T>, default is std::unique_ptr<T>" OFF)
 option(Tests "Build the tests executable" OFF)
 
 # Set the CMAKE_BUILD_TYPE (Only DEBUG and RELEASE are supported)
@@ -30,6 +31,11 @@ endif()
 # Optionally enable ccache
 if(CCache)
     SET_PROPERTY(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+endif()
+
+# Optionally define QPTR
+if(QPTR)
+    add_definitions(-DQPTR)
 endif()
 
 # Set the compilation flags
