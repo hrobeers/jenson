@@ -8,6 +8,7 @@ set(SRC
 # Headers
 set(HDR
     jenson.h
+    jenson_global.hpp
     qmemory.hpp
 )
 

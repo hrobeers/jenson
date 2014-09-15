@@ -33,9 +33,9 @@ if(CCache)
     SET_PROPERTY(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
 endif()
 
-# Optionally define QPTR
+# Optionally define JENSON_QPTR
 if(QPTR)
-    add_definitions(-DQPTR)
+    add_definitions(-DJENSON_QPTR)
 endif()
 
 # Set the compilation flags

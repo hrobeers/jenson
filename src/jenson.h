@@ -40,8 +40,9 @@
 #include <QMetaProperty>
 #include "boost/bimap.hpp"
 #include "qmemory.hpp"
+#include "jenson_global.hpp"
 
-#ifdef QPTR
+#ifdef JENSON_QPTR
     template <typename T>
     using sptr = qunique_ptr<T>;
 #else
@@ -53,7 +54,7 @@ namespace jenson
 {
     typedef boost::bimap<QString, QString> nm_type;
 
-    class SerializationException : public std::exception
+    class JENSONSHARED_EXPORT SerializationException : public std::exception
     {
     private:
         QString _message;
@@ -67,7 +68,7 @@ namespace jenson
         virtual ~SerializationException() throw() {}
     };
 
-    class JenSON
+    class JENSONSHARED_EXPORT JenSON
     {
     public:
         //
