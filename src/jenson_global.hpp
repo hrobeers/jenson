@@ -25,7 +25,7 @@
 
 #include <QtCore/qglobal.h>
 
-#if defined(JENSON_LIBRARY)
+#ifdef jenson_EXPORTS
 #  define JENSONSHARED_EXPORT Q_DECL_EXPORT
 #else
 #  define JENSONSHARED_EXPORT Q_DECL_IMPORT

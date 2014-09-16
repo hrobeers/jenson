@@ -14,10 +14,16 @@ set(TESTS_BINARY_NAME "jenson-tests")
 #
 
 # Define the Build flags
+option(Shared "Build JenSON as a shared libarary." ON)
 option(DebugBuild "Build debug binaries." OFF)
 option(CCache "Build using ccache." OFF)
-option(QPTR "Serialize to qunique_ptr<T>, default is std::unique_ptr<T>" OFF)
-option(Tests "Build the tests executable" OFF)
+option(QPTR "Serialize to qunique_ptr<T>, default is std::unique_ptr<T>." OFF)
+option(Tests "Build the tests executable." OFF)
+
+# Set the shared define
+if(Shared)
+    set(JENSON_SHARED ON)
+endif()
 
 # Set the CMAKE_BUILD_TYPE (Only DEBUG and RELEASE are supported)
 if(DebugBuild)
