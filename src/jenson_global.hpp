@@ -25,10 +25,14 @@
 
 #include <QtCore/qglobal.h>
 
-#ifdef jenson_EXPORTS
-#  define JENSONSHARED_EXPORT Q_DECL_EXPORT
+#ifdef JENSON_STATIC
+    #define JENSONSHARED_EXPORT
 #else
-#  define JENSONSHARED_EXPORT Q_DECL_IMPORT
+    #ifdef jenson_EXPORTS
+        #define JENSONSHARED_EXPORT Q_DECL_EXPORT
+    #else
+        #define JENSONSHARED_EXPORT Q_DECL_IMPORT
+    #endif
 #endif
 
 #endif // JENSON_GLOBAL_H

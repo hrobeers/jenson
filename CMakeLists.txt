@@ -23,6 +23,8 @@ option(Tests "Build the tests executable." OFF)
 # Set the shared define
 if(Shared)
     set(JENSON_SHARED ON)
+else()
+    add_definitions(-DJENSON_STATIC)
 endif()
 
 # Set the CMAKE_BUILD_TYPE (Only DEBUG and RELEASE are supported)
