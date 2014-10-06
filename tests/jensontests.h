@@ -167,18 +167,20 @@ class Testobject : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(qreal x READ x WRITE setX)
+    // Convenience JENSON_PROPERTY_GETSET macros
+    JENSON_PROPERTY_GETSET(qreal, x)
+    JENSON_PROPERTY_GETSET(Nestedobject*, nestedObj)
+
+    // Standard Q_PROBERTY macros
     Q_PROPERTY(qreal y READ y WRITE setY)
     Q_PROPERTY(QString optionalStr READ optionalStr WRITE setOptionalStr RESET initOptionalStr)
-    Q_PROPERTY(Nestedobject* nestedObj READ nestedObj WRITE setNestedObj)
     Q_PROPERTY(SingleProperty* singleProp READ singleProp WRITE setSingleProp)
     Q_PROPERTY(QVariantList list READ list WRITE setList)
     Q_PROPERTY(QVariantList intList READ intList WRITE setIntList)
 
 private:
-    qreal _x, _y;
+    qreal _y;
     QString _optionalStr;
-    Nestedobject *_nestedObj;
     SingleProperty *_sProp;
     QList<std::shared_ptr<SingleProperty>> _list;
     QList<int> _intList;
@@ -208,10 +210,8 @@ public:
     QList<std::shared_ptr<SingleProperty>> *internalList() { return &_list; }
 
     // Q_PROPERTY getters
-    qreal x() const { return _x; }
     qreal y() const { return _y; }
     QString optionalStr() const { return _optionalStr; }
-    Nestedobject* nestedObj() { return _nestedObj; }
     SingleProperty* singleProp() { return _sProp; }
     QVariantList list()
     {
@@ -231,10 +231,8 @@ public:
     }
 
     // Q_PROPERTY setters
-    void setX(const qreal x) { _x = x; }
     void setY(const qreal y) { _y = y; }
     void setOptionalStr(const QString &str) { _optionalStr = str; }
-    void setNestedObj(Nestedobject *nObj) { _nestedObj = nObj; }
     void setSingleProp(SingleProperty *sProp) { _sProp = sProp; }
     void setList(QVariantList list)
     {

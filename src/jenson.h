@@ -34,6 +34,21 @@
         static jenson::JenSON::registerForSerialization<CLASS> SERIAL_NAME(#SERIAL_NAME, &SERIAL_NAME##_SERIALIZER);\
     }
 
+#define JENSON_GETSET(TYPE, MEMBERNAME) \
+    private: TYPE _##MEMBERNAME; \
+    public: \
+    TYPE MEMBERNAME() const { \
+        return _##MEMBERNAME; \
+    }; \
+    void set##MEMBERNAME(TYPE value) { \
+        _##MEMBERNAME = value; \
+    }
+
+// Convenience macro for POCO objects
+#define JENSON_PROPERTY_GETSET(TYPE, MEMBERNAME) \
+    Q_PROPERTY(TYPE MEMBERNAME READ MEMBERNAME WRITE set##MEMBERNAME) \
+    JENSON_GETSET(TYPE, MEMBERNAME)
+
 
 #include <QObject>
 #include <QJsonObject>
