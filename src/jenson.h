@@ -146,11 +146,21 @@ namespace jenson
         template <typename T>
         static sptr<T> deserialize(const QJsonObject *jsonObj, QString *errorMsg)
         {
-            QObject* deserialized = deserializeToObject(jsonObj, errorMsg).release();
+            QObject* deserialized;
+
+            deserialized = deserializeToObject(jsonObj, errorMsg).release();
+
+            // If failed, try with providing the className (type probably not specified in JSON object)
+            if (!deserialized)
+            {
+                T t;
+                deserialized = deserializeClass(jsonObj, t.metaObject()->className(), errorMsg).release();
+            }
+
             T* casted = qobject_cast<T*>(deserialized);
             if (!casted)
             {
-                delete deserialized;
+                if (deserialized) delete deserialized;
                 T instance;
                 if (errorMsg)
                 {
