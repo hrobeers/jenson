@@ -37,8 +37,13 @@ namespace jenson
     using sptr = std::unique_ptr<T>;
 #endif
 
+    typedef QString err_type;
+
     template<typename T>
-    using expected = boost::expected<sptr<T>, QStringList>;
+    using expected = boost::expected<T, err_type>;
+
+    template<typename T>
+    using expectedPtr = boost::expected<sptr<T>, err_type>;
 }
 
 #endif // JENSON_EXPECTED_H

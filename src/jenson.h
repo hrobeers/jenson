@@ -54,7 +54,6 @@
 #include <QJsonObject>
 #include <QMetaProperty>
 #include "boost/bimap.hpp"
-#include "qmemory.hpp"
 #include "jenson_global.hpp"
 #include "expected.hpp"
 
@@ -87,7 +86,7 @@ namespace jenson
         {
         public:
             virtual QJsonValue serialize(const QObject *object) const = 0;
-            virtual expected<QObject> deserialize(const QJsonValue *jsonValue) const = 0;
+            virtual expectedPtr<QObject> deserialize(const QJsonValue *jsonValue) const = 0;
 
             virtual ~ICustomSerializer() {}
         };
@@ -97,15 +96,15 @@ namespace jenson
         {
         protected:
             virtual QJsonValue serializeImpl(const T *object) const = 0;
-            virtual expected<T> deserializeImpl(const QJsonValue *jsonValue) const = 0;
+            virtual expectedPtr<T> deserializeImpl(const QJsonValue *jsonValue) const = 0;
 
         public:
             virtual QJsonValue serialize(const QObject *object) const override final
                 { return serializeImpl(qobject_cast<const T*>(object)); }
-            virtual expected<QObject> deserialize(const QJsonValue *jsonValue) const override final
+            virtual expectedPtr<QObject> deserialize(const QJsonValue *jsonValue) const override final
                 {
                     auto deserialized = deserializeImpl(jsonValue);
-                    if (deserialized) return expected<QObject>(std::move(deserialized.value()));
+                    if (deserialized) return expectedPtr<QObject>(std::move(deserialized.value()));
                     return deserialized.get_unexpected();
                 }
 
@@ -177,12 +176,12 @@ namespace jenson
         }
 
         // Public map getters
-        static const QMap<QString, const QObject*>& typeMap() { return typeMapPriv(); }
-        static const QMap<QString, const ICustomSerializer*>& serializerMap() { return serializerMapPriv(); }
-        static const nm_type& nameMap() { return nameMapPriv(); }
+        static inline const QMap<QString, const QObject*>& typeMap() { return typeMapPriv(); }
+        static inline const QMap<QString, const ICustomSerializer*>& serializerMap() { return serializerMapPriv(); }
+        static inline const nm_type& nameMap() { return nameMapPriv(); }
 
         // Auxilliary methods
-        static bool isRegistered(QString *className, QString *errorMsg = 0);
+        static inline bool isRegistered(const QString *className) { return typeMap().contains(*className); }
         static QString toSerialName(QString className);
         static QString toClassName(QString serialName);
 

@@ -81,12 +81,12 @@ protected:
         retVal.insert("custom", val);
         return retVal;
     }
-    virtual jenson::expected<CustomSerializable> deserializeImpl(const QJsonValue *jsonValue) const override
+    virtual jenson::expectedPtr<CustomSerializable> deserializeImpl(const QJsonValue *jsonValue) const override
     {
         jenson::sptr<CustomSerializable> retVal(new CustomSerializable());
         qreal x = jsonValue->toObject().value("custom").toDouble() + 5;
         retVal->x = x;
-        return jenson::expected<CustomSerializable>(std::move(retVal));
+        return jenson::expectedPtr<CustomSerializable>(std::move(retVal));
     }
 };
 CUSTOMSERIALIZABLE(CustomSerializable, CustomSerializableSerializer, cserial)

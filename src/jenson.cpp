@@ -33,28 +33,29 @@ using namespace jenson;
 // Private methods declared here to keep header file clean
 //
 
-static bool findClass(const QJsonObject *jsonObj, QString *className, QString *errorMsg)
+static expected<QString> findClass(const QJsonObject *jsonObj)
 {
+    expected<QString> retVal;
+
     int keyCount = jsonObj->keys().count();
     if (keyCount == 1)
     {
-        QString type = JenSON::toClassName(jsonObj->keys().first());
+        QString className = JenSON::toClassName(jsonObj->keys().first());
 
-        if (JenSON::isRegistered(&type, errorMsg))
-        {
-            *className = type;
-            return true;
-        }
+        if (JenSON::isRegistered(&className))
+            retVal = expected<QString>(className);
+        else
+            retVal = boost::make_unexpected("Class \"" + className + "\" is not registered for deserialization");
     }
-    else if (errorMsg)
+    else
     {
         if (keyCount < 1)
-            errorMsg->append("\n Empty json object");
+            retVal = boost::make_unexpected("Empty json object");
         else
-            errorMsg->append("\n JsonObj contains multiple keys");
+            retVal = boost::make_unexpected("JsonObj contains multiple keys");
     }
 
-    return false;
+    return retVal;
 }
 
 static QJsonValue serialize(const QVariant var, bool *ok)
@@ -201,12 +202,16 @@ sptr<QObject> JenSON::deserializeClass(const QJsonObject *jsonObj, QString class
 
 sptr<QObject> JenSON::deserializeToObject(const QJsonObject *jsonObj, QString *errorMsg)
 {
-    QString className;
+    auto expectedClass = findClass(jsonObj);
 
-    if (!findClass(jsonObj, &className, errorMsg))
+    if (!expectedClass)
+    {
+        *errorMsg = expectedClass.get_unexpected().value();
         return nullptr;
+    }
 
     // Extract the class data
+    QString className = expectedClass.value();
     QJsonValue classValue = jsonObj->value(toSerialName(className));
 
     // Use custom deserializer if available
@@ -224,8 +229,11 @@ sptr<QObject> JenSON::deserializeClass(const QJsonObject *jsonObj, QString class
 {
     className = className.replace('*', ""); // Properties can be pointer types
 
-    if (!isRegistered(&className, errorMsg))
+    if (!isRegistered(&className))
+    {
+        errorMsg->append("\n Class \"" + className + "\" is not registered for deserialization");
         return nullptr;
+    }
 
     const QObject *obj = typeMap()[className];
     sptr<QObject> retVal(obj->metaObject()->newInstance());
@@ -272,7 +280,8 @@ sptr<QObject> JenSON::deserializeClass(const QJsonObject *jsonObj, QString class
                 else
                 {
                     // get className from nestedJSON if specified
-                    findClass(&nestedJSON, &className, nullptr);
+                    auto eClassName = findClass(&nestedJSON);
+                    if (eClassName) className = eClassName.value();
 
                     nestedObj = deserializeClass(&nestedJSON, className, errorMsg).release();
                 }
@@ -350,18 +359,6 @@ sptr<QObject> JenSON::deserializeClass(const QJsonObject *jsonObj, QString class
     }
 
     return retVal;
-}
-
-bool JenSON::isRegistered(QString *className, QString *errorMsg)
-{
-    if (!typeMap().contains(*className))
-    {
-        if (errorMsg)
-            errorMsg->append("\n Class \"" + *className + "\" is not registered for deserialization");
-        return false;
-    }
-
-    return true;
 }
 
 QString JenSON::toSerialName(QString className)
