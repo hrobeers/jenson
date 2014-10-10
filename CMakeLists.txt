@@ -76,6 +76,7 @@ endif()
 # Include the subdirectories
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src")
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/../lib/expected/include")
 
 add_subdirectory(src)
 if(Tests)

@@ -10,6 +10,7 @@ set(HDR
     jenson.h
     jenson_global.hpp
     qmemory.hpp
+    expected.hpp
 )
 
 

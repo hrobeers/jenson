@@ -26,6 +26,8 @@
 #include <QJsonArray>
 #include <memory>
 
+using namespace jenson;
+
 void JensonTests::initTestCase()
 {
     OBJ_CNT.enabled = true;

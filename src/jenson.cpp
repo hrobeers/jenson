@@ -211,7 +211,10 @@ sptr<QObject> JenSON::deserializeToObject(const QJsonObject *jsonObj, QString *e
 
     // Use custom deserializer if available
     if (serializerMap().contains(className))
-        return serializerMap()[className]->deserialize(&classValue, errorMsg);
+    {
+        // TODO append errorMsg
+        return serializerMap()[className]->deserialize(&classValue).value_or(sptr<QObject>());
+    }
 
     QJsonObject classDataObject = classValue.toObject();
     return deserializeClass(&classDataObject, className, errorMsg);
@@ -263,7 +266,8 @@ sptr<QObject> JenSON::deserializeClass(const QJsonObject *jsonObj, QString class
                 // Use custom deserializer if available
                 if (serializerMap().contains(className))
                 {
-                    nestedObj = serializerMap()[className]->deserialize(&nestedJsonValue, errorMsg).release();
+                    // TODO append errorMsg
+                    nestedObj = serializerMap()[className]->deserialize(&nestedJsonValue).value_or(sptr<QObject>()).release();
                 }
                 else
                 {

@@ -56,14 +56,7 @@
 #include "boost/bimap.hpp"
 #include "qmemory.hpp"
 #include "jenson_global.hpp"
-
-#ifdef JENSON_QPTR
-    template <typename T>
-    using sptr = qunique_ptr<T>;
-#else
-    template <typename T>
-    using sptr = std::unique_ptr<T>;
-#endif
+#include "expected.hpp"
 
 namespace jenson
 {
@@ -94,7 +87,7 @@ namespace jenson
         {
         public:
             virtual QJsonValue serialize(const QObject *object) const = 0;
-            virtual sptr<QObject> deserialize(const QJsonValue *jsonValue, QString *errorMsg = 0) const = 0;
+            virtual expected<QObject> deserialize(const QJsonValue *jsonValue) const = 0;
 
             virtual ~ICustomSerializer() {}
         };
@@ -104,13 +97,17 @@ namespace jenson
         {
         protected:
             virtual QJsonValue serializeImpl(const T *object) const = 0;
-            virtual sptr<T> deserializeImpl(const QJsonValue *jsonValue, QString *errorMsg) const = 0;
+            virtual expected<T> deserializeImpl(const QJsonValue *jsonValue) const = 0;
 
         public:
             virtual QJsonValue serialize(const QObject *object) const override final
                 { return serializeImpl(qobject_cast<const T*>(object)); }
-            virtual sptr<QObject> deserialize(const QJsonValue *jsonValue, QString *errorMsg = 0) const override final
-                { return deserializeImpl(jsonValue, errorMsg); }
+            virtual expected<QObject> deserialize(const QJsonValue *jsonValue) const override final
+                {
+                    auto deserialized = deserializeImpl(jsonValue);
+                    if (deserialized) return expected<QObject>(std::move(deserialized.value()));
+                    return deserialized.get_unexpected();
+                }
 
             virtual ~CustomSerializer() {}
         };

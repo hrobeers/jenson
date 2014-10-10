@@ -81,12 +81,12 @@ protected:
         retVal.insert("custom", val);
         return retVal;
     }
-    virtual sptr<CustomSerializable> deserializeImpl(const QJsonValue *jsonValue, QString* /*unused*/) const override
+    virtual jenson::expected<CustomSerializable> deserializeImpl(const QJsonValue *jsonValue) const override
     {
-        sptr<CustomSerializable> retVal(new CustomSerializable());
+        jenson::sptr<CustomSerializable> retVal(new CustomSerializable());
         qreal x = jsonValue->toObject().value("custom").toDouble() + 5;
         retVal->x = x;
-        return retVal;
+        return jenson::expected<CustomSerializable>(std::move(retVal));
     }
 };
 CUSTOMSERIALIZABLE(CustomSerializable, CustomSerializableSerializer, cserial)
@@ -98,7 +98,7 @@ class CustomContainer : public QObject
     Q_PROPERTY(CustomSerializable* nested READ nested WRITE setNested)
 
 private:
-    sptr<CustomSerializable> _nested;
+    jenson::sptr<CustomSerializable> _nested;
 
 public:
     Q_INVOKABLE CustomContainer() { _nested.reset(new CustomSerializable()); OBJ_CNT.inc(this); }
