@@ -164,6 +164,18 @@ void JensonTests::testSerializationFailures()
     QTR_ASSERT_THROW(sptr<Nestedobject> invalidCast = jenson::JenSON::deserialize<Nestedobject>(&json3), jenson::SerializationException)
 }
 
+void JensonTests::testOnDeserialized()
+{
+    OnDeserialized original;
+    QCOMPARE(original._onDeserializedCalled, false);
+
+    auto serial = jenson::JenSON::serialize(&original);
+    auto deserial = jenson::JenSON::deserialize<OnDeserialized>(&serial);
+
+    QCOMPARE(original._onDeserializedCalled, false);
+    QCOMPARE(deserial->_onDeserializedCalled, true);
+}
+
 cntr::~cntr()
 {
     if (objList.count() > 0)

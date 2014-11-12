@@ -345,6 +345,10 @@ sptr<QObject> JenSON::deserializeClass(const QJsonObject *jsonObj, QString class
 
     }
 
+    // Try to invoke the onDeserialized() method before returning the object
+    int idx = obj->metaObject()->indexOfMethod("onDeserialized()");
+    if (idx >= 0) obj->metaObject()->method(idx).invoke(retVal.get(), Qt::DirectConnection);
+
     return retVal;
 }
 

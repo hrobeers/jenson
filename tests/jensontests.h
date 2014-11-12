@@ -36,6 +36,7 @@ private slots:
     void testSerialization();
     void testCustomSerialization();
     void testSerializationFailures();
+    void testOnDeserialized();
 };
 
 
@@ -162,6 +163,20 @@ public:
     virtual ~DerivedSingleProperty() { OBJ_CNT.dec(this); }
 };
 SERIALIZABLE(DerivedSingleProperty, dProp)
+
+class OnDeserialized : public SingleProperty
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE OnDeserialized() : SingleProperty() { OBJ_CNT.inc(this); }
+
+    bool _onDeserializedCalled = false;
+    Q_INVOKABLE void onDeserialized() { _onDeserializedCalled = true; }
+
+    virtual ~OnDeserialized() { OBJ_CNT.dec(this); }
+};
+SERIALIZABLE(OnDeserialized, onDeserial)
 
 class Testobject : public QObject
 {
