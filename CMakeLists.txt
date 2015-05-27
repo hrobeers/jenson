@@ -20,7 +20,8 @@ option(CCache "Build using ccache." OFF)
 option(QPTR "Serialize to qunique_ptr<T>, default is std::unique_ptr<T>." OFF)
 option(Tests "Build the tests executable." OFF)
 
-# Set the shared define
+# Set the library options
+set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 if(Shared)
     set(JENSON_SHARED ON)
 else()

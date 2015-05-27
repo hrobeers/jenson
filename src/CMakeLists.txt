@@ -25,7 +25,6 @@ else()
     message(STATUS "JENSON_LIBRARY_TYPE = STATIC")
 endif()
 
-set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 add_library(jenson ${JENSON_LIBRARY_TYPE} ${SRC} ${HDR} ${MOC_SRC})
 
 
