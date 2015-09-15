@@ -157,6 +157,9 @@ QJsonObject JenSON::serialize(const QObject *qObj)
         {
             QMetaProperty mp = qObj->metaObject()->property(i);
 
+            if (!mp.isReadable())
+                continue;
+
             QVariant var = mp.read(qObj);
 
             bool ok = false;
