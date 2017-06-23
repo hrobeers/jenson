@@ -34,3 +34,7 @@ add_library(jenson ${JENSON_LIBRARY_TYPE} ${SRC} ${HDR} ${MOC_SRC})
 
 #Qt modules
 target_link_libraries(jenson Qt5::Core)
+
+install(TARGETS jenson
+  LIBRARY DESTINATION lib
+)
