@@ -28,6 +28,7 @@ Makefile
 *_automoc.cpp
 *.cbp
 CMakeFiles
+*_autogen
 
 # Jenson specific
 
