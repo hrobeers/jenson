@@ -37,4 +37,5 @@ target_link_libraries(jenson Qt5::Core)
 
 install(TARGETS jenson
   LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib/static
 )
